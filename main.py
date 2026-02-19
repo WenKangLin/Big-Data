@@ -108,7 +108,6 @@ for ticker, file in companies.items():
 # (Optional) Quick plot: NASDAQ vs S&P vs BTC Close over time
 # -----------------------------
 
-
 plt.figure()
 plt.plot(nasdq['Date'], nasdq['Close'], label='NASDAQ')
 plt.plot(snp['Date'], snp['Close'], label='S&P 500')
