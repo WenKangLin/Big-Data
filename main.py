@@ -23,7 +23,7 @@ def extract_ticker(snp_raw, ticker):
         df['Volume'] = snp_raw[vol_col].iloc[1:].values
     else:
         df['Volume'] = np.nan
-    df = df[df['Date'].str.match(r'\d{2}/\d{2}/\d{4}', na=False)].copy()
+    df = df[df['Date'].str.match(r'\d{1,2}/\d{1,2}/\d{4}', na=False)].copy()
     df['Date']   = pd.to_datetime(df['Date'], dayfirst=True)
     df['Close']  = pd.to_numeric(df['Close'],  errors='coerce')
     df['Volume'] = pd.to_numeric(df['Volume'], errors='coerce')
@@ -52,11 +52,11 @@ print(f"[Analysis] NASDAQ             : {time.perf_counter()-t0:.4f}s")
 
 # ── S&P 500 + Companies ───────────────────────────────────────
 t0      = time.perf_counter()
-snp_raw = pd.read_csv('SnP_daily_update.csv', header=0, low_memory=False)
+snp_raw = pd.read_csv('SnP_Data.csv', header=0, low_memory=False)
 
 snp = snp_raw[['Price','Close','Volume']].iloc[1:].copy()
 snp.columns = ['Date','Close','Volume']
-snp = snp[snp['Date'].str.match(r'\d{2}/\d{2}/\d{4}', na=False)].copy()
+snp = snp[snp['Date'].str.match(r'\d{1,2}/\d{1,2}/\d{4}', na=False)].copy()
 snp['Date']   = pd.to_datetime(snp['Date'], dayfirst=True)
 snp['Close']  = pd.to_numeric(snp['Close'],  errors='coerce')
 snp['Volume'] = pd.to_numeric(snp['Volume'], errors='coerce')
