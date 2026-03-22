@@ -93,7 +93,7 @@ def run_section(label, records_dict):
     print(f"{'='*55}")
     timings = {'Section': label}
 
-    # ---------- Load / Map ----------
+    # ---------- Load ----------
     t0 = time.perf_counter()
     tracemalloc.start()
 
@@ -105,6 +105,8 @@ def run_section(label, records_dict):
 
     rdd    = sc.parallelize(all_records)
     mapped = rdd.map(parse_row).filter(lambda x: x is not None)
+    mapped.cache()
+    mapped.count()   # materialise Map stage before Clean timer starts
 
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -116,24 +118,29 @@ def run_section(label, records_dict):
     # ---------- Clean (Shuffle / GroupByKey) ----------
     tracemalloc.start()
     t0 = time.perf_counter()
+
     grouped = mapped.groupByKey().mapValues(list)
     grouped.cache()
-    _, peak = tracemalloc.get_traced_memory()
-    ticker_count = grouped.count()
+    grouped.count()   # materialise shuffle before Analysis timer starts
+
     timings['Clean Time (s)']         = round(time.perf_counter()-t0, 4)
+    _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     timings['Clean Memory Peak (MB)'] = round(peak / (1024**2), 2)
     timings['Total Rows']             = len(all_records)
     print(f"\n[Clean]")
     print(f"  Total rows  : {len(all_records):,}")
-    print(f"  Tickers     : {ticker_count}")
     print(f"  Time        : {timings['Clean Time (s)']:.4f}s")
     print(f"  Memory peak : {timings['Clean Memory Peak (MB)']:.1f} MB")
+
+    mapped.unpersist()   # free Map RDD, no longer needed
 
     # ---------- Analyse (Reduce) ----------
     tracemalloc.start()
     t0 = time.perf_counter()
+
     results = grouped.map(compute_metrics).filter(lambda x: x[1] is not None).collect()
+
     timings['Analysis Time (s)']         = round(time.perf_counter()-t0, 4)
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -153,13 +160,12 @@ overall_start = time.perf_counter()
 print("MARKET DATA ANALYSIS — MapReduce (Spark Core)")
 
 # Load all datasets from data/ folder
-sp500      = load_long_csv(SNP_FILE)
-nasdq      = load_index_csv(NASDAQ_FILE, 'NASDAQ')
-btc        = load_index_csv(BTC_FILE,    'BTC')
+sp500       = load_long_csv(SNP_FILE)
+nasdq       = load_index_csv(NASDAQ_FILE, 'NASDAQ')
+btc         = load_index_csv(BTC_FILE,    'BTC')
 global_recs = {label: load_long_csv(fname) for label, fname in GLOBAL_FILES.items()}
 
-
-# Add this before your benchmark sections
+# Warm up JVM before timed sections
 print("Warming up JVM...")
 warmup_rdd = sc.parallelize(sp500[:1000])
 warmup_rdd.map(parse_row).filter(lambda x: x is not None).groupByKey().count()
