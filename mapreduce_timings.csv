@@ -1,3 +1,3 @@
 Section,Load Time (s),Load Memory Peak (MB),Clean Time (s),Clean Memory Peak (MB),Total Rows,Analysis Time (s),Analysis Memory Peak (MB)
-Benchmark  (S&P 500 only),2.2654,20.84,0.1598,0.49,2703531,6.8442,0.41
-Full Dataset  (All Markets + NASDAQ + BTC),5.3974,37.51,0.0876,0.08,4601073,19.4624,0.57
+Benchmark  (S&P 500 only),1.6339,20.84,5.1048,0.08,2703531,13.7235,0.4
+Full Dataset  (All Markets + NASDAQ + BTC),7.4863,37.51,9.771,0.08,4601073,23.6504,0.57

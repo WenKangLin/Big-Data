@@ -1,5 +1,5 @@
 Method,Section,Load Time (s),Load Memory Peak (MB),Clean Time (s),Clean Memory Peak (MB),DataFrame Size (MB),Total Rows,Analysis Time (s),Analysis Memory Peak (MB)
 Traditional,Benchmark  (S&P 500 only),0.1934,52.88,0.0018,0.01,196.35,2703531,3.0682,85.09
-MapReduce,Benchmark  (S&P 500 only),2.2654,20.84,0.1598,0.49,,2703531,6.8442,0.41
+MapReduce,Benchmark  (S&P 500 only),1.6339,20.84,5.1048,0.08,,2703531,13.7235,0.4
 Traditional,Full Dataset  (All Markets + NASDAQ + BTC),0.3298,52.88,0.095,175.49,341.69,4601073,5.6956,282.06
-MapReduce,Full Dataset  (All Markets + NASDAQ + BTC),5.3974,37.51,0.0876,0.08,,4601073,19.4624,0.57
+MapReduce,Full Dataset  (All Markets + NASDAQ + BTC),7.4863,37.51,9.771,0.08,,4601073,23.6504,0.57
