@@ -81,13 +81,13 @@ def run_section(label, frames_dict):
     print(f"  Memory peak : {timings['Load Memory Peak (MB)']:.1f} MB")
 
     # ---------- Clean ----------
-    t0 = time.perf_counter()
     tracemalloc.start()
+    t0 = time.perf_counter()
     df = pd.concat(frames, ignore_index=True)
-    mem = df.memory_usage(deep=True).sum() / (1024**2)
+    timings['Clean Time (s)']         = round(time.perf_counter()-t0, 4)
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    timings['Clean Time (s)']         = round(time.perf_counter()-t0, 4)
+    mem = df.memory_usage(deep=True).sum() / (1024**2)
     timings['Clean Memory Peak (MB)'] = round(peak / (1024**2), 2)
     timings['DataFrame Size (MB)']    = round(mem, 2)
     timings['Total Rows']             = len(df)
@@ -97,12 +97,12 @@ def run_section(label, frames_dict):
     print(f"  Memory peak : {timings['Clean Memory Peak (MB)']:.1f} MB  (DataFrame ~{mem:.1f} MB)")
 
     # ---------- Analyse ----------
-    t0 = time.perf_counter()
     tracemalloc.start()
+    t0 = time.perf_counter()
     analyse_group(df)
+    timings['Analysis Time (s)']         = round(time.perf_counter()-t0, 4)
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    timings['Analysis Time (s)']         = round(time.perf_counter()-t0, 4)
     timings['Analysis Memory Peak (MB)'] = round(peak / (1024**2), 2)
     print(f"\n[Analysis]")
     print(f"  Tickers     : {df['Ticker'].nunique()}")
