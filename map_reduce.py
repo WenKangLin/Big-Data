@@ -1,6 +1,4 @@
 import os
-os.environ['JAVA_HOME'] = '/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home'
-os.environ['PATH'] = os.environ['JAVA_HOME'] + '/bin:' + os.environ['PATH']
 
 from pyspark import SparkContext
 import pandas as pd
@@ -116,29 +114,29 @@ def run_section(label, records_dict):
     print(f"  Memory peak : {timings['Load Memory Peak (MB)']:.1f} MB")
 
     # ---------- Clean (Shuffle / GroupByKey) ----------
-    t0 = time.perf_counter()
     tracemalloc.start()
+    t0 = time.perf_counter()
     grouped = mapped.groupByKey().mapValues(list)
     grouped.cache()
-    num_tickers = grouped.count()
     _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
     timings['Clean Time (s)']         = round(time.perf_counter()-t0, 4)
+    tracemalloc.stop()
+    ticker_count = grouped.count()
     timings['Clean Memory Peak (MB)'] = round(peak / (1024**2), 2)
     timings['Total Rows']             = len(all_records)
     print(f"\n[Clean]")
     print(f"  Total rows  : {len(all_records):,}")
-    print(f"  Tickers     : {num_tickers}")
+    print(f"  Tickers     : {ticker_count}")
     print(f"  Time        : {timings['Clean Time (s)']:.4f}s")
     print(f"  Memory peak : {timings['Clean Memory Peak (MB)']:.1f} MB")
 
     # ---------- Analyse (Reduce) ----------
-    t0 = time.perf_counter()
     tracemalloc.start()
+    t0 = time.perf_counter()
     results = grouped.map(compute_metrics).filter(lambda x: x[1] is not None).collect()
+    timings['Analysis Time (s)']         = round(time.perf_counter()-t0, 4)
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    timings['Analysis Time (s)']         = round(time.perf_counter()-t0, 4)
     timings['Analysis Memory Peak (MB)'] = round(peak / (1024**2), 2)
     print(f"\n[Analysis]")
     print(f"  Tickers processed : {len(results)}")
